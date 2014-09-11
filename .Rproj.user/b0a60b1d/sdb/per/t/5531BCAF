@@ -1,0 +1,15 @@
+{
+    "contents" : "#Quesiton 1 part 2\n#SQL Queries\n\nlibrary(sqldf)\n\nUFO.data <- read.csv(\"UFOCleanData.csv\", header = TRUE)\nhead(UFO.data)\nnames(UFO.data)\n\n#convert dates\nUFO.data$Posted.At <- as.Date(UFO.data$Posted.At, \"%m/%d/%Y\")\nclass(UFO.data$Posted.At)\nUFO.data$Posted.At <- as.character(UFO.data$Posted.At)\nUFO.data$Posted.At\n\nUFO.data$Date <- as.Date(UFO.data$Date, \"%m/%d/%Y\")\nclass(UFO.data$Date)\nUFO.data$Date <- as.character(UFO.data$Date)\nUFO.data$Date\n\nif (file.exists(\"UFO.sqlite\") == TRUE) file.remove(\"UFO.sqlite\")\ndb <- dbConnect(SQLite(), dbname=\"UFO.sqlite\")\ndbWriteTable(conn = db, name = 'UFOsightings', value = UFO.data, row.names = FALSE)\n\nsqldf(\"select count(*) from UFOsightings where State = 'AK'\", dbname = \"UFO.sqlite\")\nsqldf(\"select count(*) from UFOsightings where Duration < 120 and State = 'NY'\", dbname = \"UFO.sqlite\")\nsqldf(\"select avg(Duration) from UFOsightings where Shape like '%ball'\", dbname = \"UFO.sqlite\")\nsqldf(\"select strftime('%Y', Date) as year, count(*) from UFOsightings group by strftime('%Y', Date)\", dbname = \"UFO.sqlite\")\nsqldf(\"select State, count(*) from UFOsightings where strftime('%m',Date) = '12' and strftime('%Y',Date) = '2012' group by State\", dbname = \"UFO.sqlite\")",
+    "created" : 1385954596623.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "578798221",
+    "id" : "5531BCAF",
+    "lastKnownWriteTime" : 1380736040,
+    "path" : "~/Columbia/Data science/Assignment 1/Q1part2.r",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

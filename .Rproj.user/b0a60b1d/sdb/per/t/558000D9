@@ -1,0 +1,15 @@
+{
+    "contents" : "#Load data\nrequire(rjson)\n\ntrain.data <- read.table('train.tsv', header = TRUE, sep = \"\\t\", stringsAsFactors = FALSE)\ntest.data <- read.table('test.tsv', header = TRUE, sep = \"\\t\", stringsAsFactors = FALSE)\n\nnames(train.data)\n\n\njsonData <- sapply(train.data$boilerplate, fromJSON)\n\ntrain.data$bp_title <- sapply(1:nrow(train.data), function(i, jsonData) unlist(jsonData[[i]])[1], jsonData)\ntrain.data$bp_body <- sapply(1:nrow(train.data), function(i, jsonData) unlist(jsonData[[i]])[2], jsonData)\ntrain.data$bp_url <- sapply(1:nrow(train.data), function(i, jsonData) unlist(jsonData[[i]])[3], jsonData)\n\ntest.data$bp_title <- sapply(1:nrow(test.data), function(i, jsonData) unlist(jsonData[[i]])[1], jsonData)\ntest.data$bp_body <- sapply(1:nrow(test.data), function(i, jsonData) unlist(jsonData[[i]])[2], jsonData)\ntest.data$bp_url <- sapply(1:nrow(test.data), function(i, jsonData) unlist(jsonData[[i]])[3], jsonData)\n\n#title\ntrain.data$bp_title <- gsub(\"[[:punct:]]\",\"\",train.data$bp_title)\ntrain.data$bp_title <- tolower(train.data$bp_title)\ntest.data$bp_title <- gsub(\"[[:punct:]]\",\"\",test.data$bp_title)\ntest.data$bp_title <- tolower(test.data$bp_title)\n\n#body\ntrain.data$bp_body <- gsub(\"[[:punct:]]\",\"\",train.data$bp_body)\ntrain.data$bp_body <- tolower(train.data$bp_body)\ntest.data$bp_body <- gsub(\"[[:punct:]]\",\"\",test.data$bp_body)\ntest.data$bp_body <- tolower(test.data$bp_body)\n\nkeyval<-function(key, value=NULL){\n  if(missing(value)){\n    list(key=NULL,value=key)\n  }\n  else{\n    list(key=key, value=value)\n  }\n}\n\n\nvalues<-function(kv){\n  kv$value\n}\n\nkeys<-function(kv){\n  kv$key\n}\n\ntheMapper<-function(key,value){\n  theSplit<-unlist(strsplit(x=value,split=\" \"))\n  values<-rep(x=1,times=NROW(theSplit))\n  keyval(key=theSplit,value=values)\n}\n\ntheReducer<-function(key,value){\n  keyval(key=key,value=sum(value))\n}\n\nmapreduce<-function(data,map,reduce){\n  mapResult<-map(.,data)\n  organizeResult<-tapply(X=values(mapResult),INDEX=keys(mapResult),FUN=function(x) x)\n  \n  theReduced<-mapply(reduce,key=names(organizeResult),value=organizeResult, SIMPLIFY=FALSE,USE.NAMES=FALSE)\n  \n  keyval(key=sapply(theReduced,keys),value=sapply(theReduced,values))\n  \n}\n\nwordCount_title.train <- mapreduce(data=train.data$bp_title, map=theMapper, reduce=theReducer)\nwordCount_title.test <- mapreduce(data=test.data$bp_title, map=theMapper, reduce=theReducer)\nwordCount_body.train <- mapreduce(data=train.data$bp_body, map=theMapper, reduce=theReducer)\nwordCount_body.test <- mapreduce(data=test.data$bp_body, map=theMapper, reduce=theReducer)\n\nhead(train.data)",
+    "created" : 1385950605266.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3837629590",
+    "id" : "558000D9",
+    "lastKnownWriteTime" : 1386025225,
+    "path" : "~/Google Drive/Data Science/mapreduceKaggle.r",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

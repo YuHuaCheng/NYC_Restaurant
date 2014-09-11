@@ -1,0 +1,15 @@
+{
+    "contents" : "#Question 2\n#News\n\n#Load the news data into a matrix\nconnection<-file(\"news.txt\", open='r')\nnewsdata<-readLines(connection)\nclose(connection)\nnewsdata_structure<-matrix(newsdata,ncol=8,byrow=T)\nhead(newsdata_structure)\n\n#Format the data\n#The final structured dataset is expected to be a matrix with five\n#columns corresponding to date (in the format mmddyyyy), source, category,\n#the number of words (not including punctuation) in the title, the number of\n#commas in the description. \n\n#format the date\nnewDate <- strptime(newsdata_structure[ ,5], format = \"%d %b %Y\")\nnewDate <- strftime(newDate, \"%m%d%Y\")\nhead(newDate)\n\n#format the title\nhead(newsdata_structure)\ntitle <- gsub(\"[[:punct:]]\", \"\", newsdata_structure[, 1])\nhead(title)\ntitle_words <- sapply(gregexpr(\"\\\\S+\", title), length)\nhead(title_words)\n\n#format the description\nhead(newsdata_structure)\ndescription <- newsdata_structure[ ,2]\ndescr_commas <- sapply(gregexpr(\",\", description), length)\nhead(descr_commas)\n\n#construct the final matrix\nnews_source <- newsdata_structure[ ,6]\nnews_category <- newsdata_structure[ ,7]\nnewsdata_final <- cbind(newDate, news_source, news_category, title_words, descr_commas)\nhead(newsdata_final)\ndim(newsdata_final)\n\n#Queries\nlibrary(sqldf)\nnews.data <- as.data.frame(newsdata_final)\nhead(news.data)\nnames(news.data)\n\n#Transform newDate into a suitable format\nnews.data$newDate <- strptime(news.data$newDate, format = \"%m%d%Y\")\nnews.data$newDate <- strftime(news.data$newDate, \"%Y-%m-%d\")\nhead(news.data)\nclass(news.data$newDate)\n\nif (file.exists(\"news.sqlite\") == TRUE) file.remove(\"news.sqlite\")\ndb <- dbConnect(SQLite(), dbname=\"news.sqlite\")\ndbWriteTable(conn = db, name = 'news', value = news.data, row.names = FALSE)\n\nsqldf(\"Select news_category, count(*) from news group by news_category\", dbname = \"news.sqlite\")\nsqldf(\"Select count(*) from news where news_category = 'business' and strftime('%Y',newDate) = '2011' and (strftime('%m', newDate) = '05' or strftime('%m', newDate) = '04')\", dbname = \"news.sqlite\")\nsqldf(\"Select count(*) from news where news_source = 'ut'\", dbname = \"news.sqlite\")\nsqldf(\"Select news_source, avg(title_words) from news group by news_source\", dbname = \"news.sqlite\")\nsqldf(\"Select news_source, avg(descr_commas) from news group by news_source\", dbname = \"news.sqlite\")",
+    "created" : 1385954557954.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3281854972",
+    "id" : "8013BFFB",
+    "lastKnownWriteTime" : 1380735477,
+    "path" : "~/Columbia/Data science/Assignment 1/Q2.r",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
